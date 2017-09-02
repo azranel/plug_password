@@ -10,6 +10,9 @@ defmodule PlugPassword.Block do
 
   @doc """
   Checks if password is matching.
+
+  If password will match or is already set in cookie then it will continue to
+  pipe connection. Otherwise it will render form.
   """
   def call(conn, options) do
     password = conn |> fetch_password
@@ -21,11 +24,6 @@ defmodule PlugPassword.Block do
 
   defp fetch_password(conn), do: conn.cookies["plug_password"] || conn.body_params["password"]
 
-  @doc """
-  Handles authentication
-
-  First params say if user is authenticated, second in user connection
-  """
   defp handle_authentication(true, conn) do
     conn
     |> put_resp_cookie("plug_password", fetch_password(conn))
