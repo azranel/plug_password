@@ -21,7 +21,8 @@ defmodule PlugPassword.Mixfile do
 
   defp deps do
     [
-      {:plug, "~> 1.4.3"}
+      {:plug, "~> 1.4.3"},
+      {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
 
