@@ -11,9 +11,17 @@ by adding `plug_password` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:plug_password, "~> 0.1.0"}
+    {:plug_password, "~> 0.2.0"}
   ]
 end
+```
+
+then plug it before your router:
+
+```elixir
+plug PlugPassword.Block, passwords: ["your", "passwords", "here"]
+
+plug PlugPasswordTestWeb.Router
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
