@@ -29,7 +29,9 @@ defmodule PlugPassword.Block do
     |> put_resp_cookie("plug_password", fetch_password(conn))
   end
   defp handle_authentication(false, conn) do
-    send_resp(conn, 401, PlugPassword.Template.template)
+    conn
+    |> put_resp_content_type("text/html", "UTF-8")
+    |> send_resp(401, PlugPassword.Template.template)
     |> halt
   end
 end
