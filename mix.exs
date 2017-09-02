@@ -6,8 +6,10 @@ defmodule PlugPassword.Mixfile do
       app: :plug_password,
       version: "0.1.0",
       elixir: "~> 1.5",
+      description: "Plug to simply secure your server with password",
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package()
     ]
   end
 
@@ -20,6 +22,15 @@ defmodule PlugPassword.Mixfile do
   defp deps do
     [
       {:plug, "~> 1.4.3"}
+    ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      maintainers: ["Bart Lecki"],
+      licenses: ["MIT License"],
+      links: %{"GitHub" => "https://github.com/azranel/plug_password"}
     ]
   end
 end
