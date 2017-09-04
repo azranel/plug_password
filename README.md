@@ -1,5 +1,7 @@
 # PlugPassword
 
+[![Build Status](https://travis-ci.org/azranel/plug_password.svg?branch=master)](https://travis-ci.org/azranel/plug_password)
+
 Simple authentication plug based on [rack_password](https://github.com/netguru/rack_password).
 Similary it will ask you for password only once and store it in your cookie (not like basic auth).
 
