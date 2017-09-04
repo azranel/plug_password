@@ -13,7 +13,7 @@ The package can be installed by adding `plug_password` to your list of dependenc
 ```elixir
 def deps do
   [
-    {:plug_password, "~> 0.2.0"}
+    {:plug_password, "~> 0.3.0"}
   ]
 end
 ```
