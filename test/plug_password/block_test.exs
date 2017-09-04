@@ -32,9 +32,8 @@ defmodule PlugPassword.BlockTest do
       conn = conn(:get, "/", %{ password: "hello" })
       |> SampleServer.call([])
 
-      assert conn.status == 200
+      assert conn.status == 302
       assert conn.cookies["plug_password"] == "hello"
-      assert conn.resp_body == "OK"
     end
 
     test "password in connection cookies set" do
@@ -45,6 +44,29 @@ defmodule PlugPassword.BlockTest do
       assert conn.status == 200
       assert conn.cookies["plug_password"] == "hello"
       assert conn.resp_body == "OK"
+    end
+  end
+
+  describe "test with passwords and template set" do
+    defmodule SampleTemplate do
+      @behaviour PlugPassword.Template.Behaviour
+
+      def template do
+        """
+        Custom Template
+        """
+      end
+    end
+    defmodule SampleServerWithCustomTemplate do
+      use DemoPlug, passwords: ["hello", "world"], template: SampleTemplate 
+    end
+
+    test "with template provided" do
+      conn = conn(:get, "/")
+             |> SampleServerWithCustomTemplate.call([])
+
+      assert conn.status == 401
+      assert conn.resp_body == "Custom Template\n"
     end
   end
 end
