@@ -1,4 +1,5 @@
 defmodule PlugPassword.Template do
+  @behaviour PlugPassword.Template.Behaviour
   @moduledoc """
   Holds functions related to PlugPassword templates
   """
