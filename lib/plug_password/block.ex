@@ -3,11 +3,18 @@ defmodule PlugPassword.Block do
   Plug used to add simple authentication.
 
   Options should be provided with at least passwords field.
+
+  Possible options:
+  * `:passwords` - list of passwords that should allow users to pass authentication
+  * `:template` - module which implement PlugPassword.Template.Behaviour
   """
   import Plug.Conn
 
-  def init(options), do: options
-
+  def init([passwords: _, template: _] = options), do: options
+  def init(options) do
+    List.keystore(options, :template, 0, {:template, PlugPassword.Template})
+  end
+  
   @doc """
   Checks if password is matching.
 
@@ -20,7 +27,7 @@ defmodule PlugPassword.Block do
     else
       options[:passwords]
       |> Enum.member?(conn.body_params["password"])
-      |> handle_authentication(conn)
+      |> handle_authentication(conn, options)
     end
   end
 
@@ -35,16 +42,17 @@ defmodule PlugPassword.Block do
     cookie_password && Enum.member?(options[:passwords], cookie_password)
   end
 
-  defp handle_authentication(true, conn) do
-    conn = conn
+  defp handle_authentication(true, conn, _) do
+    conn
     |> put_resp_cookie("plug_password", fetch_password(conn))
     |> put_resp_header("location", "/")
-    |> send_resp(conn.status || 302, "text/html")
+    |> send_resp(conn.status || 302, "")
+    |> halt
   end
-  defp handle_authentication(false, conn) do
+  defp handle_authentication(false, conn, options) do
     conn
     |> put_resp_content_type("text/html", "UTF-8")
-    |> send_resp(401, PlugPassword.Template.template)
+    |> send_resp(401, options[:template].template)
     |> halt
   end
 end
