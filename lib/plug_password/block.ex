@@ -7,6 +7,7 @@ defmodule PlugPassword.Block do
   Possible options:
   * `:passwords` - list of passwords that should allow users to pass authentication
   * `:template` - module which implement PlugPassword.Template.Behaviour
+  * `:path_whitelist` - regex which will be used to check if path is whitelisted
   """
   import Plug.Conn
 
@@ -22,7 +23,7 @@ defmodule PlugPassword.Block do
   pipe connection. Otherwise it will render form.
   """
   def call(conn, options) do
-    if already_authenticated?(conn, options) do
+    if already_authenticated?(conn, options) || path_whitelisted?(conn, options) do
       conn
     else
       options[:passwords]
@@ -40,6 +41,14 @@ defmodule PlugPassword.Block do
   defp already_authenticated?(conn, options) do
     cookie_password = password_from_cookies(conn)
     cookie_password && Enum.member?(options[:passwords], cookie_password)
+  end
+
+  defp path_whitelisted?(conn, options) do
+    if Keyword.has_key?(options, :path_whitelist) do
+      options[:path_whitelist] |> Regex.match?(conn.request_path)
+    else
+      false
+    end
   end
 
   defp handle_authentication(true, conn, _) do

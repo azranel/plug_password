@@ -69,4 +69,26 @@ defmodule PlugPassword.BlockTest do
       assert conn.resp_body == "Custom Template\n"
     end
   end
+
+  describe "test with passwords and path whitelist" do
+    defmodule SampleServerWithWhitelist do
+      use DemoPlug, passwords: ["hello", "world"], path_whitelist: ~r/\/users/
+    end
+
+    test "test with whitelisted path" do
+      conn = conn(:get, "/users")
+             |> SampleServerWithWhitelist.call([])
+
+      assert conn.status == 200
+      assert conn.resp_body == "OK"
+    end
+
+    test "test with not whitelisted path" do
+      conn = conn(:get, "/")
+             |> SampleServerWithWhitelist.call([])
+
+      assert conn.status == 401
+      assert conn.resp_body != "OK"
+    end
+  end
 end
