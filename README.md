@@ -26,4 +26,4 @@ plug PlugPassword.Block, passwords: ["your", "passwords", "here"]
 plug PlugPasswordTestWeb.Router
 ```
 
-check possible options to pass to plug in [HexDocs](https://hexdocs.pm/plug_password).
+check possible options to pass to plug in [HexDocs](https://hexdocs.pm/plug_password/PlugPassword.Block.html).
