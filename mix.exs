@@ -4,7 +4,7 @@ defmodule PlugPassword.Mixfile do
   def project do
     [
       app: :plug_password,
-      version: "0.2.1",
+      version: "0.3.0",
       elixir: "~> 1.5",
       description: "Plug to simply secure your server with password",
       start_permanent: Mix.env == :prod,
