@@ -58,7 +58,7 @@ defmodule PlugPassword.BlockTest do
       end
     end
     defmodule SampleServerWithCustomTemplate do
-      use DemoPlug, passwords: ["hello", "world"], template: SampleTemplate 
+      use DemoPlug, passwords: ["hello", "world"], template: SampleTemplate
     end
 
     test "with template provided" do
@@ -89,6 +89,20 @@ defmodule PlugPassword.BlockTest do
 
       assert conn.status == 401
       assert conn.resp_body != "OK"
+    end
+  end
+
+  describe "tests with password and ip whitelist" do
+    defmodule SampleServerWithIPWhitelist do
+      use DemoPlug, password: ["hello", "world"], ip_whitelist: ["127.0.0.1"]
+    end
+
+    test "test with whitelisted ip" do
+      conn = conn(:get, "/")
+             |> SampleServerWithIPWhitelist.call([])
+
+      assert conn.status == 200
+      assert conn.resp_body == "OK"
     end
   end
 end
