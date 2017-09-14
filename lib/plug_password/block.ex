@@ -9,19 +9,19 @@ defmodule PlugPassword.Block do
   * `:template` - module which implement PlugPassword.Template.Behaviour. Example: MyApp.PlugPassword.Template
   * `:path_whitelist` - regex which will be used to check if path is whitelisted. Example: ~r/users/
   * `:ip_whitelist` - list of IPs that should be whitelisted. Example: ["127.0.0.1"]
+  * `:custom_rule` - function which is run with `conn` so you can implement custom rules.
+                    Example: f(conn) -> conn.port == 80 end
+                             or
+                             &ExampleApplication.Authentication.check_user_agent/1
   """
   import Plug.Conn
 
-  def init([passwords: _, template: _] = options), do: options
-  def init(options) do
-    List.keystore(options, :template, 0, {:template, PlugPassword.Template})
-  end
+  def init(options), do: options
 
   @doc """
   Checks if password is matching.
 
-  If password will match or is already set in cookie then it will continue to
-  pipe connection. Otherwise it will render form.
+  If password will match or any of additional checks will return true, user will be authenticated. Otherwise it will render form.
   """
   def call(conn, options) do
     if skip_password_check?(conn, options) do
@@ -38,7 +38,8 @@ defmodule PlugPassword.Block do
   end
 
   defp skip_password_check?(conn, options) do
-    already_authenticated?(conn, options) || path_whitelisted?(conn, options) || ip_white_listed?(conn, options)
+    already_authenticated?(conn, options) || path_whitelisted?(conn, options) ||
+      ip_white_listed?(conn, options) || custom_rule_success?(conn, options)
   end
 
   defp password_from_cookies(conn), do: fetch_cookies(conn).cookies["plug_password"]
@@ -65,6 +66,18 @@ defmodule PlugPassword.Block do
     end
   end
 
+  defp custom_rule_success?(conn, options) do
+    if Keyword.has_key?(options, :custom_rule) do
+      options[:custom_rule].(conn)
+    else
+      false
+    end
+  end
+
+  defp template(options) do
+    (options[:template] || PlugPassword.Template).template()
+  end
+
   defp handle_authentication(true, conn, _) do
     conn
     |> put_resp_cookie("plug_password", fetch_password(conn))
@@ -75,7 +88,7 @@ defmodule PlugPassword.Block do
   defp handle_authentication(false, conn, options) do
     conn
     |> put_resp_content_type("text/html", "UTF-8")
-    |> send_resp(401, options[:template].template)
+    |> send_resp(401, template(options))
     |> halt
   end
 end

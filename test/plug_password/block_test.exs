@@ -105,4 +105,31 @@ defmodule PlugPassword.BlockTest do
       assert conn.resp_body == "OK"
     end
   end
+
+  describe "test with password and custom rule" do
+    defmodule Authentication do
+      def check_user_agent(conn) do
+        user_agent = conn.req_headers
+        |> Map.new
+        |> Map.get("user-agent")
+
+        ["facebook", "github", "twitter"]
+        |> Enum.member?(user_agent)
+      end
+    end
+
+    defmodule SampleServerWithCustomRule do
+      use DemoPlug, password: ["hello", "world"],
+        custom_rule: &Authentication.check_user_agent/1
+    end
+
+    test "test with custom rule" do
+      conn = conn(:get, "/")
+      |> put_req_header("user-agent", "facebook")
+      |> SampleServerWithCustomRule.call([])
+
+      assert conn.status == 200
+      assert conn.resp_body == "OK"
+    end
+  end
 end
