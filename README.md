@@ -23,7 +23,11 @@ end
 then plug it before your router:
 
 ```elixir
-plug PlugPassword.Block, passwords: ["your", "passwords", "here"]
+plug PlugPassword.Block, passwords: ["hello", world],
+  template: Authentication,
+  path_whitelist: ~r/users/,
+  ip_whitelist: ["86.123.112.78"],
+  custom_rule: &Authentication.custom_rule/1
 
 plug PlugPasswordTestWeb.Router
 ```

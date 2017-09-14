@@ -10,9 +10,17 @@ defmodule PlugPassword.Block do
   * `:path_whitelist` - regex which will be used to check if path is whitelisted. Example: ~r/users/
   * `:ip_whitelist` - list of IPs that should be whitelisted. Example: ["127.0.0.1"]
   * `:custom_rule` - function which is run with `conn` so you can implement custom rules.
-                    Example: f(conn) -> conn.port == 80 end
-                             or
+                    Example:
+                            f(conn) -> conn.port == 80 end
+                    or
                              &ExampleApplication.Authentication.check_user_agent/1
+
+  #### Example
+        plug PlugPassword.Block, passwords: ["hello", world],
+          template: Authentication,
+          path_whitelist: ~r/users/,
+          ip_whitelist: ["86.123.112.78"],
+          custom_rule: &Authentication.custom_rule/1
   """
   import Plug.Conn
 
