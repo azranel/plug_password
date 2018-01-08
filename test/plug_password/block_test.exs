@@ -6,10 +6,10 @@ defmodule PlugPassword.BlockTest do
     defmacro __using__(args) do
       quote bind_quoted: [args: args] do
         use Plug.Builder
-        plug Plug.Parsers, parsers: [:urlencoded]
-        plug :fetch_cookies
-        plug PlugPassword.Block, args
-        plug :index
+        plug(Plug.Parsers, parsers: [:urlencoded])
+        plug(:fetch_cookies)
+        plug(PlugPassword.Block, args)
+        plug(:index)
         defp index(conn, _opts), do: conn |> send_resp(200, "OK")
       end
     end
@@ -21,25 +21,28 @@ defmodule PlugPassword.BlockTest do
     end
 
     test "no password in cookie or params provided" do
-      conn = conn(:get, "/")
-      |> SampleServer.call([])
+      conn =
+        conn(:get, "/")
+        |> SampleServer.call([])
 
       assert conn.status == 401
       assert conn.halted == true
     end
 
     test "password in body params provided" do
-      conn = conn(:get, "/", %{ password: "hello" })
-      |> SampleServer.call([])
+      conn =
+        conn(:get, "/", %{password: "hello"})
+        |> SampleServer.call([])
 
       assert conn.status == 302
       assert conn.cookies["plug_password"] == "hello"
     end
 
     test "password in connection cookies set" do
-      conn = conn(:get, "/")
-      |> put_resp_cookie("plug_password", "hello")
-      |> SampleServer.call([])
+      conn =
+        conn(:get, "/")
+        |> put_resp_cookie("plug_password", "hello")
+        |> SampleServer.call([])
 
       assert conn.status == 200
       assert conn.cookies["plug_password"] == "hello"
@@ -57,13 +60,15 @@ defmodule PlugPassword.BlockTest do
         """
       end
     end
+
     defmodule SampleServerWithCustomTemplate do
       use DemoPlug, passwords: ["hello", "world"], template: SampleTemplate
     end
 
     test "with template provided" do
-      conn = conn(:get, "/")
-             |> SampleServerWithCustomTemplate.call([])
+      conn =
+        conn(:get, "/")
+        |> SampleServerWithCustomTemplate.call([])
 
       assert conn.status == 401
       assert conn.resp_body == "Custom Template\n"
@@ -76,16 +81,18 @@ defmodule PlugPassword.BlockTest do
     end
 
     test "test with whitelisted path" do
-      conn = conn(:get, "/users")
-             |> SampleServerWithWhitelist.call([])
+      conn =
+        conn(:get, "/users")
+        |> SampleServerWithWhitelist.call([])
 
       assert conn.status == 200
       assert conn.resp_body == "OK"
     end
 
     test "test with not whitelisted path" do
-      conn = conn(:get, "/")
-             |> SampleServerWithWhitelist.call([])
+      conn =
+        conn(:get, "/")
+        |> SampleServerWithWhitelist.call([])
 
       assert conn.status == 401
       assert conn.resp_body != "OK"
@@ -98,8 +105,9 @@ defmodule PlugPassword.BlockTest do
     end
 
     test "test with whitelisted ip" do
-      conn = conn(:get, "/")
-             |> SampleServerWithIPWhitelist.call([])
+      conn =
+        conn(:get, "/")
+        |> SampleServerWithIPWhitelist.call([])
 
       assert conn.status == 200
       assert conn.resp_body == "OK"
@@ -109,9 +117,10 @@ defmodule PlugPassword.BlockTest do
   describe "test with password and custom rule" do
     defmodule Authentication do
       def check_user_agent(conn) do
-        user_agent = conn.req_headers
-        |> Map.new
-        |> Map.get("user-agent")
+        user_agent =
+          conn.req_headers
+          |> Map.new()
+          |> Map.get("user-agent")
 
         ["facebook", "github", "twitter"]
         |> Enum.member?(user_agent)
@@ -119,14 +128,16 @@ defmodule PlugPassword.BlockTest do
     end
 
     defmodule SampleServerWithCustomRule do
-      use DemoPlug, password: ["hello", "world"],
+      use DemoPlug,
+        password: ["hello", "world"],
         custom_rule: &Authentication.check_user_agent/1
     end
 
     test "test with custom rule" do
-      conn = conn(:get, "/")
-      |> put_req_header("user-agent", "facebook")
-      |> SampleServerWithCustomRule.call([])
+      conn =
+        conn(:get, "/")
+        |> put_req_header("user-agent", "facebook")
+        |> SampleServerWithCustomRule.call([])
 
       assert conn.status == 200
       assert conn.resp_body == "OK"

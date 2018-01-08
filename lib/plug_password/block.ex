@@ -59,7 +59,7 @@ defmodule PlugPassword.Block do
 
   defp ip_white_listed?(conn, options) do
     if Keyword.has_key?(options, :ip_whitelist) do
-      ip = conn.remote_ip |> Tuple.to_list |> Enum.join(".")
+      ip = conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
       options[:ip_whitelist] |> Enum.member?(ip)
     else
       false
@@ -93,6 +93,7 @@ defmodule PlugPassword.Block do
     |> send_resp(conn.status || 302, "")
     |> halt
   end
+
   defp handle_authentication(false, conn, options) do
     conn
     |> put_resp_content_type("text/html", "UTF-8")
